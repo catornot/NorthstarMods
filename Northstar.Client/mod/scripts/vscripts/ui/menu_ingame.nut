@@ -85,6 +85,9 @@ void function InitInGameMPMenu()
 	var gameHeader = AddComboButtonHeader( comboStruct, headerIndex, "#MENU_HEADER_GAME" )
 	var leaveButton = AddComboButton( comboStruct, headerIndex, buttonIndex++, "#LEAVE_MATCH" )
 	Hud_AddEventHandler( leaveButton, UIE_CLICK, OnLeaveButton_Activate )
+	var teamChangeButton = AddComboButton( comboStruct, headerIndex, buttonIndex++, "#SWITCH_TEAMS" )
+	Hud_AddEventHandler( teamChangeButton, UIE_CLICK, OnRequestTeamSwitch )
+	thread UpdateTeamSwitchButton_Threaded( teamChangeButton )
 	#if DEV
 		var devButton = AddComboButton( comboStruct, headerIndex, buttonIndex++, "Dev" )
 		Hud_AddEventHandler( devButton, UIE_CLICK, AdvanceMenuEventHandler( GetMenu( "DevMenu" ) ) )
@@ -112,8 +115,13 @@ void function InitInGameMPMenu()
 		Hud_AddEventHandler( soundButton, UIE_CLICK, AdvanceMenuEventHandler( GetMenu( "VideoMenu" ) ) )
 	#endif
 
-	file.faqButton = AddComboButton( comboStruct, headerIndex, buttonIndex++, "#KNB_MENU_HEADER" )
-	Hud_AddEventHandler( file.faqButton, UIE_CLICK, AdvanceMenuEventHandler( GetMenu( "KnowledgeBaseMenu" ) ) )
+	// MOD SETTINGS
+	var modSettingsButton = AddComboButton( comboStruct, headerIndex, buttonIndex++, "Mod Settings" )
+	Hud_AddEventHandler( modSettingsButton, UIE_CLICK, AdvanceMenuEventHandler( GetMenu( "ModSettings" ) ) )
+
+	// Nobody reads the FAQ so we replace it with ModSettings because of the limited combobutton space available
+	//file.faqButton = AddComboButton( comboStruct, headerIndex, buttonIndex++, "#KNB_MENU_HEADER" )
+	//Hud_AddEventHandler( file.faqButton, UIE_CLICK, AdvanceMenuEventHandler( GetMenu( "KnowledgeBaseMenu" ) ) )
 
 	//var dataCenterButton = AddComboButton( comboStruct, headerIndex, buttonIndex++, "#DATA_CENTER" )
 	//Hud_AddEventHandler( dataCenterButton, UIE_CLICK, OpenDataCenterDialog )
@@ -133,7 +141,7 @@ void function OnInGameMPMenu_Open()
 
 	bool faqIsNew = !GetConVarBool( "menu_faq_viewed" ) || HaveNewPatchNotes() || HaveNewCommunityNotes()
 	RuiSetBool( Hud_GetRui( file.settingsHeader ), "isNew", faqIsNew )
-	ComboButton_SetNew( file.faqButton, faqIsNew )
+	//ComboButton_SetNew( file.faqButton, faqIsNew )
 
 	UpdateLoadoutButtons()
 	RefreshCreditsAvailable()
@@ -255,6 +263,10 @@ void function InitInGameSPMenu()
 		var videoButton = AddComboButton( comboStruct, headerIndex, buttonIndex++, "#VIDEO" )
 		Hud_AddEventHandler( videoButton, UIE_CLICK, AdvanceMenuEventHandler( GetMenu( "VideoMenu" ) ) )
 	#endif
+	
+	// MOD SETTINGS
+	var modSettingsButton = AddComboButton( comboStruct, headerIndex, buttonIndex++, "Mod Settings" )
+	Hud_AddEventHandler( modSettingsButton, UIE_CLICK, AdvanceMenuEventHandler( GetMenu( "ModSettings" ) ) )
 
 	array<var> orderedButtons
 
@@ -689,5 +701,23 @@ void function SetTitanSelectButtonVisibleState( bool state )
 		Hud_Hide( file.titanHeader )
 		Hud_Hide( file.titanEditButton )
 		Hud_Hide( file.titanSelectButton )
+	}
+}
+
+void function UpdateTeamSwitchButton_Threaded( var button )
+{
+	while ( true )
+	{
+		Hud_SetLocked( button, !GetConVarBool( "ns_allow_team_change" ) )
+		wait 0.5
+	}
+}
+
+void function OnRequestTeamSwitch( var button )
+{
+	if ( !Hud_IsLocked( button ) )
+	{
+		ClientCommand( "changeteam" )
+		CloseAllMenus()
 	}
 }
