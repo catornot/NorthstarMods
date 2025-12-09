@@ -534,7 +534,7 @@ void function OnPlayFDButton_Activate( var button ) // repurposed for launching 
 {
 	if ( !Hud_IsLocked( button ) )
 	{
-		SetConVarString( "communities_hostname", "" ) // disable communities due to crash exploits that are still possible through it
+		SetConVarString( "communities_hostname", "communities.asillyneko.dev" )
 		NSTryAuthWithLocalServer()
 		thread TryAuthWithLocalServer()
 	}
