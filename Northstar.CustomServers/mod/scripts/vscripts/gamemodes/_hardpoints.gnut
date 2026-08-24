@@ -117,7 +117,7 @@ void function OnHardpointEnter( entity trigger, entity player )
 	entity hp = trigger.GetOwner()
 
 	// don't handle anything other than players yet
-	if ( !player.IsPlayer() )
+	if ( player.IsValid() && !player.IsPlayer() )
 		return
 
 	// it's just too hard to handle emarking and disemarking with the count stuff
@@ -136,7 +136,7 @@ void function OnHardpointLeave( entity trigger, entity player )
 	entity hp = trigger.GetOwner()
 
 	// don't handle anything other than players yet
-	if ( !player.IsPlayer() )
+	if ( player.IsValid() && !player.IsPlayer() )
 		return
 
 	// it's just too hard to handle emarking and disemarking with the count stuff
